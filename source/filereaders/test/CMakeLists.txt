@@ -1,0 +1,6 @@
+add_executable(FileReaderTestExe FileReaderTest.cpp)
+target_link_libraries(FileReaderTestExe PRIVATE FILEREADER)
+target_compile_options(FileReaderTestExe PRIVATE -O0)
+target_include_directories(FileReaderTestExe PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+file(COPY test_files DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME FileReaderTest COMMAND FileReaderTestExe)

@@ -1,0 +1,89 @@
+# RESULTS: Time series of c_3(i,j) and N_v
+# OrderParameters Input
+#
+# AtomGroup
+#   name      = target_atoms
+#   selection = [ atom_type OW ]
+#   num_atoms = 4125
+#
+# Indus(ProbeVolume)
+#   name = v
+#   outputs = [ value N Ntilde ]
+#   target_atom_group = target_atoms
+#   ProbeVolume
+#     type = cylinder
+#     parallel_to_axis = z
+#     center_of_base = {2.5, 2.5, 2} [nm]
+#     r_max = 1 [nm]
+#     axis_range = [ 22.75] [nm]
+#     Coarse-graining
+#       sigma   = 0 [nm]
+#       alpha_c = 0 [nm]
+#
+# Steinhardt
+#   name = q
+#   outputs = [ value numEdgeCases ]
+#   type           = c
+#   full_name      = c_3(i,j)
+#   harmonic_index = 3
+#   probe_volume      = v
+#   target_atom_group = target_atoms
+#   Flags
+#     is_atomwise       = 1
+#     is_intensive      = 0
+#     need_derivatives  = 0
+#     do_fast_harmonics = 1
+#   Shells
+#     width_shell_1 = 0.7 [nm]
+#     width_shell_2 = 0.35 [nm]
+#   CHILL+ options
+#     cij_range_S = [ -1  -0.8 ]
+#     cij_range_E = [ -0.35  0.25 ]
+#     chillstar_variant = 3
+#   Neighbor_sphere 
+#     radius  = 0.35 [nm]
+#     sigma   = 0 [nm]
+#     alpha_c = 0 [nm]
+#
+# Biasing_potentials
+#   Need_Derivatives = 0
+# Post-processing options
+#   Xtc_File = ../../../sample_traj/bulk_water_278K/traj_water_278K_b1000_e1010.xtc
+#   Gro_File = ../../../sample_traj/bulk_water_278K/initconf.gro
+#   Production_phase
+#     t_min = none [ps]
+#     t_max = none [ps]
+#   Histogram Fv(q)
+#     min_q   = -1
+#     max_q   = 1
+#     NumBins = 100
+#
+# Output
+#   Order parameter
+#     Avg_q     -0.34172
+#     Var_q     0.00126209
+#     Stdev_q   0.0355259
+#     kappa_0_q 792.336 [kBT]
+#   Number of particles
+#     Avg_n_v     81
+#     Var_n_v     9.4
+#     Stdev_n_v   3.06594
+#     kappa_0_n_v 0.106383 [kBT]
+#   Suggested biasing parameters (2*kappa_0 and 4 kBT overlap rules of thumb)
+#     kappa_q        1584.67 [kBT]
+#     delta_q_star   0.0820436
+#     kappa_n_v      0.212766 [kBT]
+#     delta_n_v_star 7.08049
+#
+# Time[ps]	avg(q(i))_v	N_v	Ntilde_v
+1000	-0.306893	77	77
+1001	-0.37053	82	82
+1002	-0.298104	80	80
+1003	-0.381669	84	84
+1004	-0.384284	84	84
+1005	-0.373	76	76
+1006	-0.326414	84	84
+1007	-0.278966	81	81
+1008	-0.340897	79	79
+1009	-0.347083	79	79
+1010	-0.351078	85	85
