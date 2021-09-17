@@ -14,7 +14,7 @@ public:
   using Map = std::map<T, V>;
   Dataset(const InputPack& inputpack);
   const Timeseries* getTimeseriesViaIndex(int i) const{
-    return ts_[i];
+    return &ts_[i];
   }
   int getNumTimeseries() const{
     return ts_.size();
@@ -23,10 +23,23 @@ public:
     return biases_[i];
   }
 private:
-  //a dataset contains pointers to all timeseries data
-  std::vector<Timeseries*> ts_;
+  //a dataset contains copies of all ts data, as time-range restrictions are applied here
+  std::vector<Timeseries> ts_;
   std::vector<std::vector<Bias*> > biases_; //each simulation may have some biases associated with it that the dataset would be aware of 
   Generator* generator_;
   std::string name_, generator_name_;
-  
+  std::array<double, 2> trange_;
 };
+
+Dataset createBlockDataset(const Dataset& ds, int nblocks){
+  int nts = ds.getNumTimeseries();
+  std::vector<int> nsamples(nts, 0);
+  std::vector<int> approx_samples_per_block(nts, 0);
+  for(int i = 0; i < nts; i++){
+    auto ts_temp = ds.getTimeseriesViaIndex(i);
+    int approx_samples_per_block = ts_temp->getTime().size();
+
+  }
+  std::vector<Timeseries*> ts_data(nts, 0);
+
+} 

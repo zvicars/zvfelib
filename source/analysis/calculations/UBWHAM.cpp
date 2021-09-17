@@ -26,18 +26,17 @@ UBWHAM::UBWHAM(const InputPack& input) : Calculation{input} {
   npoints_ = 0;
   for(int i = 0; i < nsims_; i++){
     auto ts = dataset_->getTimeseriesViaIndex(i);
-    auto time_vec = ts[i].getTime();
+    auto time_vec = ts->getTime();
     npoints_ += time_vec.size();
     nvec_[i] = time_vec.size();
-    lognvec_[i] = log(time_vec.size());
+    lognvec_[i] = log((double)time_vec.size());
   }
   logn_ = log(npoints_);
-
   x_ = Eigen::VectorXd::Ones(nsims_);
   grad_ = Eigen::VectorXd::Zero(nsims_);
   return;
 }
-double LSE(std::vector<double> arr) {
+static inline double LSE(std::vector<double> arr) {
 		int count = arr.size();
 		if(count > 0 )
 		{
@@ -64,11 +63,11 @@ double LSE(std::vector<double> arr) {
 double UBWHAM::calc_theta_uij(int sim, int pt, int bias_sim){
   double thetauij = 0.0;
   auto timeseries = dataset_->getTimeseriesViaIndex(sim);
-  auto bias = dataset_->getBiasesViaIndex(sim);
+  auto bias = dataset_->getBiasesViaIndex(bias_sim);
   for(int i = 0; i < bias.size(); i++){
     auto input_columns = bias[i]->getInputColumns();
     std::vector<double> params;
-    for(int j = 0; j < params.size(); j++){
+    for(int j = 0; j < input_columns.size(); j++){
       params.push_back(timeseries->getDatapointViaIndex(input_columns[j], pt));
     }
     thetauij += bias[i]->calculate(params);
@@ -77,29 +76,34 @@ double UBWHAM::calc_theta_uij(int sim, int pt, int bias_sim){
 }
 
 double UBWHAM::calc_log_term(const Eigen::VectorXd& x, int sim, int pt, int r){
-  return lognvec_[r] - logn_ - x[r] - calc_theta_uij(sim, pt, r);
+  return lognvec_[r] + x[r] - calc_theta_uij(sim, pt, r);
 }
-
+double UBWHAM::calc_log_term2(const Eigen::VectorXd& x, int sim, int pt, int r, int k){
+  return lognvec_[r] + x[r] + calc_theta_uij(sim, pt, k) - calc_theta_uij(sim, pt, r);
+}
 double UBWHAM::compute_kappa(const Eigen::VectorXd& x){
   std::vector<double> log_terms(nsims_);
+  double sum2 = 0.0;
+  for(int i = 0; i < nsims_; i++){
+    sum2 += -x[i]*(double)nvec_[i];
+  }
+
   double sum = 0.0;
   for(int i = 0; i < nsims_; i++){
     for(int j = 0; j < nvec_[i]; j++){
       for(int k = 0; k < nsims_; k++){
         log_terms[k] = calc_log_term(x, i, j, k);
       }
-      sum += LSE(log_terms);
+      double eval1 = LSE(log_terms);
+      sum += eval1;
     }
   }
-  double sum2 = 0.0;
-  for(int i = 0; i < nsims_; i++){
-    sum2 += x[i]*(double)lognvec_[i]/(double)logn_;
-  }
-  return (sum/(double)npoints_) + sum2;
+  double eval = -sum - sum2;
+  return -eval;
 }
 
 double UBWHAM::compute_dkappa(const Eigen::VectorXd& x, int l){
-  if(l = 0) return 0.0; //first point fixed
+  if(l == 0) return 0.0; //first point fixed
   std::vector<double> big_lse(npoints_);
   std::vector<double> little_lse(nsims_);
   int counter = 0;
@@ -107,16 +111,16 @@ double UBWHAM::compute_dkappa(const Eigen::VectorXd& x, int l){
     for(int j = 0; j < nvec_[i]; j++){
       double term1 = calc_log_term(x, i, j, l);
       for(int r = 0; r < nsims_; r++){
-        little_lse[r] = calc_log_term(x,i,j,r);
+        little_lse[r] = calc_log_term(x, i, j, r);
       }
-      term1 -= LSE(little_lse);
-      big_lse[counter] = term1;
+      double term2 = LSE(little_lse);
+      big_lse[counter] = term1 - term2;
       counter++; //keeps track of biglse index
     }
   }
   double eval = LSE(big_lse);
-  eval = (-1.0/(double)npoints_) * exp(eval) + ( x[l] * (double)nvec_[l]/(double)npoints_ );
-  return eval;
+  eval = -exp(eval) + (double)nvec_[l];
+  return -eval;
 }
 double UBWHAM::get_gradient(const Eigen::VectorXd& x, Eigen::VectorXd& grad)
 {
@@ -132,6 +136,12 @@ double UBWHAM::get_gradient(const Eigen::VectorXd& x, Eigen::VectorXd& grad)
 			sum += fabs(grad(i));
 		}
 	}
+  std::cout << "Gradient sum is " << sum << std::endl;
+  std::cout << "x values are ";
+  for(int i = 0; i < x.size(); i++){
+    std::cout << x[i] << " ";
+  }
+  std::cout << std::endl;
 	return sum;
 }
 
@@ -142,6 +152,8 @@ void UBWHAM::calculate(){
   param_.max_iterations = iter;
   solver_ = new LBFGSpp::LBFGSSolver<double>(param_);
   Eigen::VectorXd x = Eigen::VectorXd::Ones(nsims_);
+  //x << 1, -15.7578, -30.1066, -43.9612, -59.1488, -76.0897, -89.3729,  -97.414, -99.5752;
+  std::cout << "Initial eval = " << compute_kappa(x)  << std::endl;
   Eigen::VectorXd grad = Eigen::VectorXd::Zero(nsims_);
   double fx;
 	int niter = 0;
@@ -155,11 +167,40 @@ void UBWHAM::calculate(){
   delete solver_;
 	return;
 }
+double UBWHAM::calc_zk(const Eigen::VectorXd& x, int k_in){
+  std::vector<double> log_terms(nsims_);
+  double sum = 0.0;
+  for(int i = 0; i < nsims_; i++){
+    for(int j = 0; j < nvec_[i]; j++){
+      for(int k = 0; k < nsims_; k++){
+        log_terms[k] = calc_log_term2(x, i, j, k, k_in);
+      }
+      double eval1 = LSE(log_terms);
+      sum += 1.0/eval1;
+    }
+  }
+  return sum;
+}
+
+double UBWHAM::calc_z0(const Eigen::VectorXd& x){
+  std::vector<double> log_terms(nsims_);
+  double sum = 0.0;
+  for(int i = 0; i < nsims_; i++){
+    for(int j = 0; j < nvec_[i]; j++){
+      for(int k = 0; k < nsims_; k++){
+        log_terms[k] = calc_log_term(x, i, j, k);
+      }
+      double eval1 = LSE(log_terms);
+      sum += 1.0/eval1;
+    }
+  }
+  return sum;
+}
 
 double UBWHAM::calc_log_obs_weight(const Eigen::VectorXd& x, int sim, int point){
   std::vector<double> small_lse(nsims_);
   for(int r = 0; r < nsims_; r++){
-    small_lse[r] = lognvec_[r] - x[r] - calc_theta_uij(sim, point, r);
+    small_lse[r] = calc_log_term(x, sim, point, r);
   }
   return -LSE(small_lse);
 }

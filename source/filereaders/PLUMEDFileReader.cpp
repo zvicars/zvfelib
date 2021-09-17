@@ -6,7 +6,7 @@ static inline bool isCommentLine(std::string line){
 }
 
 //the file structure should be a series of comment lines followed by timeseries data
-bool OPFileReader::load(std::string filename){
+bool PLUMEDFileReader::load(std::string filename){
   std::ifstream ifile(filename);
   if(!ifile.is_open()){
     std::cout << "Failed to open input file " << filename << "." << std::endl;
@@ -45,10 +45,12 @@ bool OPFileReader::load(std::string filename){
       }
       ifile.seekg(linebeforelast);
       std::getline(ifile, line);
+      line.erase(line.find("! FIELDS"), 8);
       std::string data_label;
       line = line.substr(1); //trim the initial #
       std::stringstream ss2(line);
       while(ss2 >> data_label){
+        //std::cout << data_label << std::endl;
         data_labels.push_back(data_label);
       }
       if(data_labels.size() != ncols){

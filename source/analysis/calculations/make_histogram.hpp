@@ -64,7 +64,7 @@ static inline void makeHistogramWeighted(const std::vector<double>& data, const 
       double datum = data[i];
       int index = std::round((datum - min_bin_)/bin_size_);
       if(index > max_bin_ || index < min_bin_) continue;
-      y_vals[index] += exp(weights[i]);
+      y_vals[index] += weights[i];
   }
 
   return;

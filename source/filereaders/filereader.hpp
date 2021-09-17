@@ -33,6 +33,13 @@ protected:
 private:
 };
 
+class PLUMEDFileReader : public FileReader{
+public:
+  virtual bool load(std::string filename);
+protected:
+private:
+};
+
 class MCFileReader : public FileReader{
 public:
   virtual bool load(std::string filename){
@@ -53,6 +60,7 @@ private:
 
 inline FileReader* createFileReader(std::string key){
   if(key == "op") return new OPFileReader();
+  if(key == "plumed") return new PLUMEDFileReader();
   if(key == "mc") return new MCFileReader();
   if(key == "zvtl") return new ZVTLFileReader();
   if(key == "indus") return new IndusFileReader();

@@ -4,7 +4,7 @@
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
-double LSE(std::vector<double> arr) 
+static inline double LSE(std::vector<double> arr) 
 {
 		int count = arr.size();
 		if(count > 0 )
@@ -29,7 +29,7 @@ double LSE(std::vector<double> arr)
 		}
 		return 0.0;
 }
-double LSNE(std::vector<double> arr) 
+static inline double LSNE(std::vector<double> arr) 
 {
 		int count = arr.size();
 		if(count > 0 )

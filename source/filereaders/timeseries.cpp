@@ -66,7 +66,7 @@ double Timeseries::getDatapointViaIndex(int i, int j) const{
 const std::vector<double>& Timeseries::getDataViaLabel(std::string label) const{
   auto iter = label2column_.find(label);
   if(iter == label2column_.end()){
-    std::cout << "Could not find column with specified label." << std::endl;
+    std::cout << "Could not find column with specified label " << label << "." << std::endl;
     throw 0;
   }
   return data_[iter->second];

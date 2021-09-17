@@ -13,9 +13,12 @@ public:
 protected:
   double calc_ubwham_term();
   double calc_log_term(const Eigen::VectorXd& x, int sim, int point, int k);
+  double calc_log_term2(const Eigen::VectorXd& x, int sim, int pt, int r, int k);
   double compute_kappa(const Eigen::VectorXd& x);
   double compute_dkappa(const Eigen::VectorXd& x, int l);
   double calc_theta_uij(int sim, int point, int bias_sim);
+  double calc_zk(const Eigen::VectorXd& x, int k_in);
+  double calc_z0(const Eigen::VectorXd& x);
   double calc_log_obs_weight(const Eigen::VectorXd& x, int sim, int point);
   double get_gradient(const Eigen::VectorXd& x, Eigen::VectorXd& grad);
   void makeOutputHistogram(const std::vector<double>& obs, const std::vector<double>& weights);
@@ -27,7 +30,7 @@ protected:
   double logn_;
   int npoints_, nsims_;
   //lbfgs params
-  double eps = 1e-5;
+  double eps = 1e-2;
 	double iter = 1000; 
   //output control
   std::string column_label_; //can only do up to 2d histogram

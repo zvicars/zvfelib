@@ -23,6 +23,13 @@ public:
   std::vector<Timeseries*> getTimeseries(){
     return timeseries_;
   }
+  std::vector<Timeseries> getTimeseriesCopy(){
+    std::vector<Timeseries> ts_ret;
+    for(int i = 0; i < timeseries_.size(); i++){
+      ts_ret.push_back(*timeseries_[i]);
+    }
+    return ts_ret;
+  }
   std::string getName(){
     return name_;
   }

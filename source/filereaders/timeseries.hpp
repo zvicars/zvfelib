@@ -30,6 +30,11 @@ public:
   const Vec<double>& getDataViaLabel(std::string label) const;
   int getIndexViaLabel(std::string label) const;
   const Vec<double>& getTime() const;
+  void deleteIndex(int i){
+    time_.erase(time_.begin() + i);
+    data_.erase(data_.begin() + i);
+    return;
+  }
   bool computeStats();
   const Vec<TimeseriesStatistics>& getStats(){
     return stats_;

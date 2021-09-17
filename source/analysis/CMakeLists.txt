@@ -5,6 +5,7 @@ add_library (ANALYSIS STATIC
   biases/HarmonicBias.cpp
   calculations/Calculation.cpp
   calculations/BWHAM.cpp
+  calculations/UBWHAM.cpp
 )
 target_compile_options(ANALYSIS PRIVATE)
 target_link_libraries(ANALYSIS PRIVATE TOOLS FILEREADER)
