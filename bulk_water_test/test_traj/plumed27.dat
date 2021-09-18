@@ -1,0 +1,8 @@
+indus: INDUS INPUTFILE=indus27.input
+restraint: RESTRAINT ARG=indus.ntilde KAPPA=0.74 AT=27
+PRINT ...
+	LABEL=print
+	ARG=indus.n,indus.ntilde,restraint.bias
+	STRIDE=100
+	FILE=plumed27.out
+... PRINT

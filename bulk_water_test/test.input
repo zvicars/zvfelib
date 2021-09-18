@@ -1,0 +1,37 @@
+Bias = {
+  name = umbrella
+  type = harmonic
+  k = 0.296
+  xstar = 0.0
+  mu = 0.0
+  columns = [ 1 ]
+}
+
+Generator = {
+  name = gen1
+  type = list
+  filereader = plumed
+  filepaths = [ test_traj/0/plumed0.out test_traj/9/plumed9.out test_traj/18/plumed18.out test_traj/27/plumed27.out test_traj/36/plumed36.out test_traj/45/plumed45.out test_traj/54/plumed54.out test_traj/63/plumed63.out test_traj/72/plumed72.out ]
+  bias_template = umbrella
+  subcols = [ xstar ]
+  param0 = [ 0 9 18 27 36 45 54 63 72 ]
+}
+
+Dataset = {
+  name = d1
+  generator = gen1
+}
+
+Calculation = {
+  name = whamcalc
+  type = UBWHAM
+  column = indus.ntilde
+  histogram = 1
+  bin_range = [ 0 80 ]
+  bin_size = 1.0
+  dataset = d1
+  error = kfold
+  minimization = LBFGS
+  output = whamout.txt
+  base = whamcalc
+}

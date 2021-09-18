@@ -1,0 +1,8 @@
+Target = [ atom_index 1-6495:3 ]
+ProbeVolume = 
+{
+type = box
+x_range = [ 1.2 2.488 ]
+y_range = [ 1.2 2.488 ]
+z_range = [ 1.2 2.488 ]
+}
